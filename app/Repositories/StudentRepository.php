@@ -22,7 +22,7 @@ class StudentRepository implements StudentRepositoryInterface
 
     public function getById($id)
     {
-        return Student::findOrFail($id);
+        return Student::find($id);
     }
 
     public function store(array $data)
