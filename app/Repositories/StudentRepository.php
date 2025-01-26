@@ -25,6 +25,11 @@ class StudentRepository implements StudentRepositoryInterface
         return Student::find($id);
     }
 
+    public function getByName($name)
+    {
+        return Student::where('name', $name)->first();
+    }
+
     public function store(array $data)
     {
         return Student::create($data);
@@ -32,7 +37,8 @@ class StudentRepository implements StudentRepositoryInterface
 
     public function update(array $data, $id)
     {
-        return Student::whereId($id)->update($data);
+        Student::whereId($id)->update($data);
+        return self::getById($id);
     }
 
     public function delete($id)

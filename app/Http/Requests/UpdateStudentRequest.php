@@ -13,7 +13,7 @@ class UpdateStudentRequest extends FormRequest
      */
     public function authorize(): bool
     {
-        return false;
+        return true;
     }
 
     /**
@@ -26,14 +26,14 @@ class UpdateStudentRequest extends FormRequest
         return [
             'name' => 'required|string',
             'age' => 'required|integer|min:0|max:120',
-            'date_of_birth' => 'required|date|before:today'
+            'dateOfBirth' => 'required|date|before:today'
         ];
     }
 
     public function failedValidation(Validator $validator)
     {
         throw new HttpResponseException(response()->json([
-            'success' => false,
+            'status' => 400,
             'message' => 'Validation errors',
             'data' => $validator->errors()
         ]));

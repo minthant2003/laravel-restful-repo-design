@@ -41,10 +41,15 @@ class StudentController extends Controller
      */
     public function store(StoreStudentRequest $request)
     {
+        $sameNameStudent = $this->studentRepositoryInterface->getByName($request->name);
+        if ($sameNameStudent !== null) {
+            return ApiResponseClass::sendResponse(null, 'Same name already exists.', 409);
+        }
+
         $newStudent = [
             'name' => $request->name,
             'age' => $request->age,
-            'date_of_birth' => $request->date_of_birth
+            'date_of_birth' => $request->dateOfBirth
         ];
         DB::beginTransaction();
         try {
@@ -82,14 +87,23 @@ class StudentController extends Controller
      */
     public function update(UpdateStudentRequest $request, $id)
     {
-        $updatedStudent = [
+        $existingStudent = $this->studentRepositoryInterface->getById($id);
+        if ($existingStudent === null) {
+            return ApiResponseClass::sendResponse(null, 'Student not found.', 404);
+        }
+        $sameNameStudent = $this->studentRepositoryInterface->getByName($request->name);
+        if ($sameNameStudent !== null && (int)$sameNameStudent->id !== (int)$id) {
+            return ApiResponseClass::sendResponse(null, 'Same name already exists.', 409);
+        }
+
+        $updatedData = [
             'name' => $request->name,
             'age' => $request->age,
-            'date_of_birth' => $request->date_of_birth
+            'date_of_birth' => $request->dateOfBirth
         ];
         DB::beginTransaction();
         try {
-            $updatedStudent = $this->studentRepositoryInterface->update($updatedStudent, $id);
+            $updatedStudent = $this->studentRepositoryInterface->update($updatedData, $id);
             DB::commit();
             return ApiResponseClass::sendResponse(new StudentResource($updatedStudent), 'Student updated successfully.', 200);
         } catch (\Exception $e) {
@@ -106,8 +120,8 @@ class StudentController extends Controller
         if ($existingStudent === null) {
             return ApiResponseClass::sendResponse(null, 'Student not found.', 404);
         } else {
-            $deletedStudent = $this->studentRepositoryInterface->delete($id);
-            return ApiResponseClass::sendResponse(new StudentResource($deletedStudent), 'Student deleted successfully.', 200);
+            $this->studentRepositoryInterface->delete($id);
+            return ApiResponseClass::sendResponse(new StudentResource($existingStudent), 'Student deleted successfully.', 200);
         }
     }
 }
