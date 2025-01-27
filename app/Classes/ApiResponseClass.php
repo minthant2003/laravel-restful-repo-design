@@ -19,7 +19,18 @@ class ApiResponseClass
     public static function rollback($e, $message = "Something went wrong! Process not completed.")
     {
         DB::rollBack();
+        self::printStackTrace($e);
         self::throw($e, $message);
+    }
+
+    public static function printStackTrace($e)
+    {
+        Log::error('Exception occurred:', [
+            'message' => $e->getMessage(),
+            'file' => $e->getFile(),
+            'line' => $e->getLine(),
+            'stackTrace' => $e->getTraceAsString()
+        ]);
     }
 
     public static function throw($e, $message = "Something went wrong! Process not completed.")
@@ -29,7 +40,7 @@ class ApiResponseClass
             'message' => $message,
             'data' => $e->getMessage()
         ];
-        Log::info($e);
+        // Log::info($e);
         throw new HttpResponseException(response()->json($response, 500));
     }
 
